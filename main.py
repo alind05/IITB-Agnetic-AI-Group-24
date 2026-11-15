@@ -214,7 +214,8 @@ async def api_approve_plan(run_id: str, req: ApprovePlanReq):
     try:
         t0 = time.monotonic()
         config = {"configurable": {"thread_id": run_id}}
-        await ANALYST_GRAPH.ainvoke(Command(resume=req.plan or {}), config=config)
+        resume_val = req.plan if (req.plan is not None and bool(req.plan)) else {"approved": True}
+        await ANALYST_GRAPH.ainvoke(Command(resume=resume_val), config=config)
 
         updated = get_run(run_id)
         if not updated:
