@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-app: #090d16;
+  --bg-card: #111827;
+  --bg-card-hover: #1f2937;
+  --border-color: #1e293b;
+  --border-focus: #3b82f6;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-blue: #3b82f6;
+  --accent-blue-hover: #2563eb;
+  --badge-bg: #1e293b;
+  --badge-text: #60a5fa;
+  --badge-border: #334155;
+}
+
+body {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+}
+
+h1, h2, h3, h4 {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+.fact-badge {
+  display: inline-flex;
+  align-items: center;
+  margin: 1px 2px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
+  border-radius: 4px;
+  background-color: #172554;
+  color: #93c5fd;
+  border: 1px solid #1d4ed8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fact-badge:hover {
+  background-color: #1e40af;
+  color: #ffffff;
+}
+
+.passage-badge {
+  display: inline-flex;
+  align-items: center;
+  margin: 1px 2px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
+  border-radius: 4px;
+  background-color: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.passage-badge:hover {
+  background-color: #334155;
+  color: #ffffff;
+}

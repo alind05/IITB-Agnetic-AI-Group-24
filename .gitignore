@@ -1,0 +1,24 @@
+# Secrets & Environment variables
+.env
+*.env
+!.env.example
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Large media files (served via git releases or external storage)
+video_raw/
+*.webm
+*.wav
+
+# Local persistent state & cache
+.data/
+.cache/

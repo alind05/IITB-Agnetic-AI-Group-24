@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyst Desk — Institutional Equity Research (LangGraph + FinRobot)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              950: '#060913',
+              900: '#090d16',
+              850: '#0d1322',
+              800: '#111827',
+              700: '#1f2937',
+              600: '#374151',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="bg-dark-900 text-slate-100 antialiased min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-dark-800 border-b border-dark-600 sticky top-0 z-30 shadow-lg">
+    <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-md shadow-blue-900/50">AD</div>
+        <div>
+          <span class="text-base font-bold tracking-tight text-white block leading-tight">Analyst Desk</span>
+          <span class="text-[10px] font-mono text-blue-400 font-medium">SEC EDGAR XBRL + FinRobot Deterministic Engine</span>
+        </div>
+      </div>
+
+      <nav class="flex items-center gap-1 bg-dark-900 p-1 rounded-xl border border-dark-600 text-xs font-medium">
+        <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow-sm transition-all">Overview & Evals</button>
+        <button onclick="switchTab('desk')" id="nav-desk" class="nav-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all">Research Desk</button>
+        <button onclick="switchTab('portal')" id="nav-portal" class="nav-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all">Research Portal</button>
+        <button onclick="switchTab('eval')" id="nav-eval" class="nav-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all">Eval Suite</button>
+        <button onclick="switchTab('memory')" id="nav-memory" class="nav-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all">Coverage Memory</button>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <button onclick="openGrafanaTelemetry()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-700/60 rounded-xl transition-all shadow-sm" title="Open Live Telemetry & Grafana Dashboard">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>📊 Live Telemetry / Grafana</span>
+        </button>
+        <button onclick="resetDesk()" class="px-4 py-2 text-xs font-semibold text-slate-200 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl transition-all shadow-sm">
+          + New Assignment
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-[1440px] w-full mx-auto px-6 py-6 space-y-6">
+
+    <!-- TAB 0: PROJECT OVERVIEW & EVALUATION METRICS -->
+    <section id="tab-overview" class="space-y-6">
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-6">
+        <div>
+          <span class="text-xs font-mono font-semibold text-blue-400 uppercase tracking-wider">System Architecture & Methodology</span>
+          <h1 class="text-2xl font-bold text-white tracking-tight mt-1">Analyst Desk: Institutional Equity Research Platform</h1>
+          <p class="text-sm text-slate-300 mt-2 leading-relaxed">
+            Analyst Desk is an agentic multi-agent research workspace built on LangGraph and FinRobot. It bridges unstructured Large Language Model synthesis with deterministic SEC EDGAR XBRL ingestion, Python sandbox arithmetic verification, and automated 10-K risk factor diffs.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+          <div class="p-5 bg-dark-900 border border-dark-600 rounded-xl space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-950 text-blue-400 border border-blue-800 flex items-center justify-center font-bold text-sm">01</div>
+            <h3 class="font-bold text-white text-sm">Deterministic XBRL Ingestion</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">Pulls official structured SEC EDGAR XBRL facts (Revenues, Operating Income, Net Income) mapped to unique immutable Fact IDs (<code class="font-mono text-blue-400">FACT:MSFT:REV:FY2024</code>).</p>
+          </div>
+          <div class="p-5 bg-dark-900 border border-dark-600 rounded-xl space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-950 text-blue-400 border border-blue-800 flex items-center justify-center font-bold text-sm">02</div>
+            <h3 class="font-bold text-white text-sm">Python Sandbox Arithmetic</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">All financial ratios (operating margins, YoY growth, basis point deltas) are computed inside a secure Python sandbox executing hard-coded verification checks prior to publishing.</p>
+          </div>
+          <div class="p-5 bg-dark-900 border border-dark-600 rounded-xl space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-950 text-blue-400 border border-blue-800 flex items-center justify-center font-bold text-sm">03</div>
+            <h3 class="font-bold text-white text-sm">10-K Item 1A Risk Diffs</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">Performs semantic and structural longitudinal diffing across successive annual 10-K filings to surface newly added, removed, or materially altered regulatory risks.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-white">Evaluation Metrics & Guardrail Benchmarks</h2>
+          <p class="text-xs text-slate-400 mt-1">How Analyst Desk measures performance against single-agent baselines and SEC ground truth.</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border border-dark-600 rounded-xl overflow-hidden">
+            <thead>
+              <tr class="bg-dark-900 border-b border-dark-600 text-slate-400 uppercase tracking-wider font-semibold">
+                <th class="p-4">Evaluation Dimension</th>
+                <th class="p-4">Target Metric</th>
+                <th class="p-4">Verification Method</th>
+                <th class="p-4">Multi-Agent vs. Single Agent</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-dark-600 text-slate-300">
+              <tr class="hover:bg-dark-900/50">
+                <td class="p-4 font-medium text-white">Fact-ID Grounding</td>
+                <td class="p-4 font-mono text-emerald-400 font-semibold">100% Fact Coverage</td>
+                <td class="p-4">Every numerical figure in text must link to an immutable XBRL Fact ID registry.</td>
+                <td class="p-4">Multi-agent enforces strict citation checking; single agents frequently hallucinate figures.</td>
+              </tr>
+              <tr class="hover:bg-dark-900/50">
+                <td class="p-4 font-medium text-white">Arithmetic Accuracy</td>
+                <td class="p-4 font-mono text-emerald-400 font-semibold">&lt; 0.5% Tolerance</td>
+                <td class="p-4">Python sandbox code execution verifies margin calculations and YoY bps deltas.</td>
+                <td class="p-4">Sandbox eliminates LLM mental arithmetic errors.</td>
+              </tr>
+              <tr class="hover:bg-dark-900/50">
+                <td class="p-4 font-medium text-white">Compliance & Return-Promises</td>
+                <td class="p-4 font-mono text-emerald-400 font-semibold">Zero Violations</td>
+                <td class="p-4">Regex and Judge node scan for prohibited buy/sell directives or return promises.</td>
+                <td class="p-4">Automated critic loop blocks publication if unverified advice language is detected.</td>
+              </tr>
+              <tr class="hover:bg-dark-900/50">
+                <td class="p-4 font-medium text-white">Token Budget Efficiency</td>
+                <td class="p-4 font-mono text-blue-400 font-semibold">Optimized &lt; 28k tokens</td>
+                <td class="p-4">LangGraph parallel fan-out limits redundant retrieval calls.</td>
+                <td class="p-4">Superior cost-to-latency ratio compared to brute-force monolithic prompts.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="switchTab('desk')" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-blue-950">
+            Launch Research Desk →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: RESEARCH DESK -->
+    <section id="tab-desk" class="hidden space-y-6">
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-6 shadow-xl space-y-5">
+        <div class="flex flex-wrap items-baseline justify-between gap-4">
+          <div>
+            <h1 class="text-xl font-bold text-white tracking-tight">Institutional Equity Research Assignment</h1>
+            <p class="text-xs text-slate-400 mt-1">
+              Multi-agent LangGraph workflow executing SEC XBRL ingestion, Python sandbox ratio verification, and 10-K Item 1A risk diffs.
+            </p>
+          </div>
+          <div class="flex items-center gap-2.5 text-xs bg-dark-900 px-3.5 py-2 rounded-xl border border-dark-600">
+            <label for="tokenBudget" class="font-medium text-slate-400">Token Budget</label>
+            <select id="tokenBudget" class="bg-dark-800 text-blue-400 border border-dark-600 rounded-lg px-2.5 py-1 font-mono text-xs focus:outline-none focus:border-blue-500">
+              <option value="18000">18,000 tokens</option>
+              <option value="28000" selected>28,000 tokens</option>
+              <option value="40000">40,000 tokens</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3">
+          <input
+            id="queryInput"
+            type="text"
+            value="Compare Microsoft's and Alphabet's operating margins over the last three fiscal years, and tell me what changed in their risk factors."
+            class="flex-1 px-4 py-3 text-sm bg-dark-900 border border-dark-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent font-medium"
+          />
+          <button id="btnStart" onclick="startResearch()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30 whitespace-nowrap flex items-center justify-center gap-2">
+            <span>Draft Research Plan</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400 pt-1">
+          <span class="font-medium text-slate-300">Presets (14 Companies):</span>
+          <button onclick="setPreset(0)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">MSFT vs GOOGL (Cloud/AI)</button>
+          <button onclick="setPreset(1)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">AAPL vs NVDA (Hardware & AI Compute)</button>
+          <button onclick="setPreset(2)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">AMZN vs META (E-Commerce & Digital Ads)</button>
+          <button onclick="setPreset(3)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">V vs MA (Global Payments Duopoly)</button>
+          <button onclick="setPreset(4)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">JPM vs BAC (Tier-1 US Banking)</button>
+          <button onclick="setPreset(5)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">TSLA vs ORCL (Autonomous Tech & Cloud)</button>
+          <button onclick="setPreset(6)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">WMT vs AMZN (Omnichannel Retail)</button>
+          <button onclick="setPreset(7)" class="px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-600 hover:border-blue-500 text-slate-300 transition-all">AXP vs V (Closed-Loop Credit vs Open Rail)</button>
+        </div>
+        <div id="errorBox" class="hidden p-4 rounded-xl border border-red-900/50 bg-red-950/40 text-xs text-red-300"></div>
+      </div>
+
+      <!-- Pipeline Status Bar -->
+      <div id="pipelineCard" class="hidden border border-dark-600 rounded-2xl bg-dark-800 p-5 shadow-xl space-y-4">
+        <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 pb-3 border-b border-dark-600">
+          <div class="flex items-center gap-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-semibold text-white">LangGraph StateGraph Engine</span>
+            <span class="text-dark-600">|</span>
+            <span id="runIdLabel" class="font-mono text-blue-400"></span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span id="elapsedLabel" class="tabular-nums font-mono"></span>
+            <span class="font-mono tabular-nums bg-dark-900 px-3 py-1 rounded-lg border border-dark-600 text-slate-300" id="budgetLabel"></span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs" id="stageGrid"></div>
+      </div>
+
+      <!-- Human Edit Interrupt: Plan Approval -->
+      <div id="planInterruptCard" class="hidden border border-amber-500/40 rounded-2xl bg-dark-800 p-6 shadow-xl space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-dark-600">
+          <div>
+            <div class="text-[11px] font-mono font-semibold text-amber-400 uppercase tracking-wider mb-1">LangGraph Edit Interrupt — Awaiting Plan Review</div>
+            <h2 class="text-lg font-bold text-white">Research Lead Execution Plan</h2>
+          </div>
+          <button id="btnApprovePlan" onclick="approvePlan()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md">
+            Approve Plan & Execute Parallel Workers
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Note Title</label>
+            <input id="planTitle" type="text" class="w-full px-3.5 py-2.5 text-sm bg-dark-900 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Target Tickers</label>
+            <input id="planTickers" type="text" class="w-full px-3.5 py-2.5 text-sm font-mono bg-dark-900 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div id="fiscalWarningBox" class="p-3.5 bg-dark-900 border border-dark-600 rounded-xl text-xs text-amber-300/90 leading-relaxed font-mono"></div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-2">Sub-Questions (Editable)</label>
+          <textarea id="planSubQuestions" rows="4" class="w-full p-3.5 text-xs bg-dark-900 border border-dark-600 rounded-xl text-slate-200 font-sans leading-relaxed focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+      </div>
+
+      <!-- Research Output Workspace -->
+      <div id="outputWorkspace" class="hidden space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-dark-600 pb-4">
+          <div class="flex items-center gap-1.5 p-1.5 bg-dark-800 rounded-xl border border-dark-600 text-xs font-medium">
+            <button onclick="switchSubTab('note')" id="sub-note" class="sub-btn px-4 py-2 rounded-lg bg-blue-600 text-white shadow-sm transition-all">Research Note & Approval</button>
+            <button onclick="switchSubTab('quant')" id="sub-quant" class="sub-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all">XBRL & FinRobot Quant</button>
+            <button onclick="switchSubTab('risks')" id="sub-risks" class="sub-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all">Item 1A Risk Diff</button>
+            <button onclick="switchSubTab('trace')" id="sub-trace" class="sub-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all">Compliance & Hooks Trace</button>
+          </div>
+          <div id="guardrailSummary" class="text-xs font-mono font-medium text-emerald-400 bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-900/50"></div>
+        </div>
+
+        <!-- Sub-tab: Note & Approval Gate -->
+        <div id="panel-note" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div class="lg:col-span-8 border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-5">
+            <div class="text-xs text-slate-400 pb-4 border-b border-dark-600 flex items-center justify-between">
+              <span>Click any inline <span class="font-mono text-blue-400 font-semibold">FACT</span> or <span class="font-mono text-slate-300 font-semibold">PASSAGE</span> badge to audit underlying SEC EDGAR XBRL metadata.</span>
+              <span class="font-mono text-[11px] text-slate-500">Verified via Python Sandbox</span>
+            </div>
+            <div id="renderedNote" class="prose prose-invert max-w-none text-sm leading-relaxed space-y-4"></div>
+          </div>
+
+          <div class="lg:col-span-4 border border-dark-600 rounded-2xl bg-dark-800 p-6 shadow-xl space-y-5">
+            <div>
+              <h3 class="text-sm font-bold text-white">Analyst Approval Gate</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Required before portal publication</p>
+            </div>
+            <div id="complianceStats" class="p-3.5 bg-dark-900 border border-dark-600 rounded-xl text-xs space-y-2"></div>
+            <div id="signForm" class="space-y-4">
+              <p class="text-xs text-slate-400"><code class="font-mono text-blue-400">publish_note</code> is cryptographically locked until signed by lead analyst.</p>
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1.5">Signing Analyst</label>
+                <input id="analystNameInput" type="text" value="Equity Analyst Desk" class="w-full px-3.5 py-2.5 text-xs bg-dark-900 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-blue-500 font-medium" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1.5">Sign-Off Attestation</label>
+                <textarea id="attestationInput" rows="3" class="w-full px-3.5 py-2.5 text-xs bg-dark-900 border border-dark-600 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 leading-relaxed">I have verified every XBRL Fact ID, fiscal calendar alignment, and 10-K passage citation in this research note.</textarea>
+              </div>
+              <button onclick="publishNote()" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30">
+                Sign & Publish to Research Portal
+              </button>
+            </div>
+            <div id="publishedBanner" class="hidden p-4 bg-emerald-950/50 border border-emerald-900/50 rounded-xl text-xs text-emerald-300 space-y-1.5 font-mono"></div>
+          </div>
+        </div>
+
+        <!-- Sub-tab: XBRL & FinRobot Quant Table -->
+        <div id="panel-quant" class="hidden border border-dark-600 rounded-2xl bg-dark-800 overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse text-left">
+              <thead>
+                <tr class="bg-dark-900 border-b border-dark-600 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <th class="px-5 py-3.5">Company</th>
+                  <th class="px-5 py-3.5">FY</th>
+                  <th class="px-5 py-3.5">Period End</th>
+                  <th class="px-5 py-3.5 text-right">Revenue ($B)</th>
+                  <th class="px-5 py-3.5 text-right">Op Income ($B)</th>
+                  <th class="px-5 py-3.5 text-right">Op Margin</th>
+                  <th class="px-5 py-3.5 text-right">YoY Delta</th>
+                  <th class="px-5 py-3.5">FinRL Regime & Fact IDs</th>
+                </tr>
+              </thead>
+              <tbody id="quantTableBody" class="divide-y divide-dark-600 tabular-nums text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sub-tab: Risk Diff -->
+        <div id="panel-risks" class="hidden border border-dark-600 rounded-2xl bg-dark-800 divide-y divide-dark-600 shadow-xl overflow-hidden"></div>
+
+        <!-- Sub-tab: Compliance & Trace -->
+        <div id="panel-trace" class="hidden border border-dark-600 rounded-2xl bg-dark-800 p-6 shadow-xl space-y-3"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: RESEARCH PORTAL -->
+    <section id="tab-portal" class="hidden space-y-4">
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-5">
+        <div>
+          <h1 class="text-xl font-bold text-white">Institutional Research Portal</h1>
+          <p class="text-xs text-slate-400 mt-1">Signed, compliance-audited equity research notes persisted to Portal database.</p>
+        </div>
+        <div id="portalList" class="divide-y divide-dark-600"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: EVAL & BENCHMARK -->
+    <section id="tab-eval" class="hidden space-y-6">
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="text-base font-bold text-white">Deep-Research Benchmark: Multi-Agent LangGraph vs. Single Agent</h2>
+            <p class="text-xs text-slate-400 mt-1">Compares Fact-ID grounding, code verification rate, cost, and latency under the same token budget.</p>
+          </div>
+          <button onclick="runBenchmark()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md">
+            Run Head-to-Head Benchmark
+          </button>
+        </div>
+        <div id="benchmarkOutput" class="text-xs text-slate-400 font-mono">Click "Run Head-to-Head Benchmark" to evaluate.</div>
+      </div>
+
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="text-base font-bold text-white">SEC XBRL Ground Truth & FinanceBench Eval Suite</h2>
+            <p class="text-xs text-slate-400 mt-1">Verifies Python sandbox arithmetic against official SEC EDGAR XBRL data.</p>
+          </div>
+          <button onclick="runXbrlEval()" class="px-4 py-2.5 bg-dark-700 hover:bg-dark-600 border border-dark-600 text-white text-xs font-semibold rounded-xl transition-all">
+            Run XBRL Eval Suite
+          </button>
+        </div>
+        <div id="evalOutput" class="text-xs text-slate-400 font-mono">Click "Run XBRL Eval Suite" to verify.</div>
+      </div>
+
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="text-base font-bold text-white">Red-Team & Security Guardrail Audit (L15)</h2>
+            <p class="text-xs text-slate-400 mt-1">Tests prompt injection defense, unauthorized investment advice filters, and untagged hallucination blocks.</p>
+          </div>
+          <button onclick="runRedTeam()" class="px-4 py-2.5 bg-red-950/80 hover:bg-red-900 border border-red-700/60 text-red-200 text-xs font-semibold rounded-xl transition-all shadow-md">
+            Run Red-Team Security Audit
+          </button>
+        </div>
+        <div id="redTeamOutput" class="text-xs text-slate-400 font-mono">Click "Run Red-Team Security Audit" to test guardrails.</div>
+      </div>
+
+      <!-- Observability & Grafana Monitoring Card -->
+      <div class="border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <h2 class="text-base font-bold text-white">Production Observability: Prometheus & Grafana Monitoring Stack</h2>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">Real-time system telemetry scraping query throughput, task processing histograms, and concurrent agent jobs.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openGrafanaTelemetry()" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition-all shadow-md flex items-center gap-1.5">
+              <span>📊 View Live Telemetry / Grafana</span>
+            </button>
+            <a href="/metrics" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2.5 bg-dark-700 hover:bg-dark-600 border border-dark-600 text-slate-300 text-xs font-mono font-medium rounded-xl transition-all" title="View Raw Prometheus Text Stream">
+              /metrics
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 space-y-1.5">
+            <span class="text-[10px] font-mono uppercase text-blue-400 font-bold">Throughput Counter</span>
+            <div class="text-sm font-bold text-white font-mono">app_requests_total</div>
+            <p class="text-[11px] text-slate-400">Total HTTP requests categorized by endpoint and status (200 / 400 / 500) for real-time req/sec timeseries.</p>
+          </div>
+          <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 space-y-1.5">
+            <span class="text-[10px] font-mono uppercase text-purple-400 font-bold">Latency Histogram</span>
+            <div class="text-sm font-bold text-white font-mono">app_processing_seconds</div>
+            <p class="text-[11px] text-slate-400">Duration tracking across financial report synthesis, XBRL eval, and Red-Team audit tasks.</p>
+          </div>
+          <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 space-y-1.5">
+            <span class="text-[10px] font-mono uppercase text-emerald-400 font-bold">Workload Gauge</span>
+            <div class="text-sm font-bold text-white font-mono">app_active_jobs</div>
+            <p class="text-[11px] text-slate-400">Instantaneous number of concurrent LangGraph research runs being executed in the Python sandbox.</p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-dark-900/60 border border-dark-600 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-2">
+          <span>Quick Login: User: <code class="text-white font-mono">admin</code> | Pass: <code class="text-white font-mono">admin</code></span>
+          <span>Prometheus Scraper: <code class="text-blue-400 font-mono">http://localhost:9090/targets</code></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: COVERAGE MEMORY -->
+    <section id="tab-memory" class="hidden border border-dark-600 rounded-2xl bg-dark-800 p-8 shadow-xl space-y-5">
+      <div>
+        <h1 class="text-xl font-bold text-white">Coverage Memory & Longitudinal Diff</h1>
+        <p class="text-xs text-slate-400 mt-1">Query across all published notes and prior coverage history.</p>
+      </div>
+      <div class="flex gap-3">
+        <input id="memoryQuestion" type="text" value="What changed in Microsoft and Alphabet operating margins and risks since our last coverage note?" class="flex-1 px-4 py-3 text-sm bg-dark-900 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-blue-500" />
+        <button onclick="askMemory()" class="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md whitespace-nowrap">Query History</button>
+      </div>
+      <div id="memoryAnswer" class="p-5 bg-dark-900 border border-dark-600 rounded-xl text-sm text-slate-200 whitespace-pre-wrap font-sans leading-relaxed"></div>
+    </section>
+  </main>
+
+  <!-- Evidence Drawer Modal -->
+  <div id="evidenceDrawer" class="hidden fixed inset-y-0 right-0 z-40 w-full max-w-md bg-dark-800 border-l border-dark-600 shadow-2xl p-6 overflow-y-auto space-y-5">
+    <div class="flex items-center justify-between pb-4 border-b border-dark-600">
+      <h3 id="drawerTitle" class="text-sm font-bold text-white">Citation Evidence</h3>
+      <button onclick="closeDrawer()" class="text-xs px-2.5 py-1.5 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg text-slate-300">Close</button>
+    </div>
+    <div id="drawerBody" class="text-xs space-y-4 text-slate-300 font-sans"></div>
+  </div>
+
+  <!-- Live Telemetry & Grafana Modal -->
+  <div id="telemetryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="relative w-full max-w-3xl bg-dark-800 border border-dark-600 rounded-2xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between border-b border-dark-600 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+            <h3 class="text-base font-bold text-white tracking-tight">Application Telemetry & Observability</h3>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Live metrics from Prometheus scraper & Grafana monitoring stack</p>
+        </div>
+        <button onclick="closeTelemetryModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-dark-700 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Environment Mode Indicator -->
+      <div id="telemetryEnvBanner" class="p-4 rounded-xl bg-dark-900 border border-dark-600 space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs font-semibold text-slate-200">
+            <span id="telemetryStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="telemetryStatusTitle">Local Python Runtime (Native Mode)</span>
+          </div>
+          <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-700 px-2.5 py-0.5 rounded-full">Endpoint: /metrics ACTIVE</span>
+        </div>
+        <p id="telemetryStatusDesc" class="text-xs text-slate-400 leading-relaxed">
+          Application metrics are actively recorded in memory and published at <code class="text-blue-400 font-mono">http://localhost:8000/metrics</code>.
+        </p>
+      </div>
+
+      <!-- Live Metric Tiles -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 space-y-1">
+          <div class="text-[10px] font-mono text-blue-400 uppercase font-bold">Total Requests (app_requests_total)</div>
+          <div id="statReqTotal" class="text-2xl font-bold text-white font-mono">0</div>
+          <div class="text-[11px] text-slate-400" id="statReqBreakdown">200 OK: 0 | Errors: 0</div>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 space-y-1">
+          <div class="text-[10px] font-mono text-emerald-400 uppercase font-bold">Active Jobs (app_active_jobs)</div>
+          <div id="statActiveJobs" class="text-2xl font-bold text-emerald-400 font-mono">0</div>
+          <div class="text-[11px] text-slate-400">Concurrent research tasks</div>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 space-y-1">
+          <div class="text-[10px] font-mono text-purple-400 uppercase font-bold">Avg Latency (app_processing_seconds)</div>
+          <div id="statAvgLatency" class="text-2xl font-bold text-purple-400 font-mono">0.0s</div>
+          <div class="text-[11px] text-slate-400">Sandbox arithmetic duration</div>
+        </div>
+      </div>
+
+      <!-- Endpoints Breakdown Table -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
+          <span>Active Endpoint Traffic (Live)</span>
+          <button onclick="refreshLiveMetrics()" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 font-mono text-[11px]">
+            <span>↻ Refresh</span>
+          </button>
+        </div>
+        <div class="border border-dark-600 rounded-xl overflow-hidden bg-dark-900">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-dark-950 text-slate-400 uppercase font-mono text-[10px] border-b border-dark-600">
+              <tr>
+                <th class="p-3">Tracked Endpoint</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-right">Hit Count</th>
+              </tr>
+            </thead>
+            <tbody id="telemetryEndpointsTable" class="divide-y divide-dark-600 font-mono text-xs text-slate-300">
+              <tr><td colspan="3" class="p-3 text-center text-slate-500">Loading live telemetry...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Docker Stack Launch Guide (For Teammates & Docker Users) -->
+      <div class="p-4 rounded-xl bg-dark-900/90 border border-blue-900/50 space-y-2.5">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="text-xs font-bold text-blue-300 flex items-center gap-1.5">
+            <span>🐳 External Grafana & Prometheus Stack (Docker Mode):</span>
+          </span>
+          <span class="text-[10px] font-mono text-amber-300 bg-amber-950/80 border border-amber-800/80 px-2.5 py-0.5 rounded-full">
+            Active in Docker Only (Native Python Mode Running)
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          The external Grafana service on Port 3000 runs inside a Docker container. When running locally via <code class="text-white font-mono">start.bat</code>, <strong>all live metrics are already actively tracked and displayed in this dashboard above!</strong> If your team wants to spin up the external Grafana UI container, run in terminal:
+        </p>
+        <div class="bg-black/60 p-2.5 rounded-lg border border-dark-600 font-mono text-xs text-emerald-300 flex items-center justify-between">
+          <code>docker compose up --build -d</code>
+          <button onclick="navigator.clipboard.writeText('docker compose up --build -d')" class="text-[10px] text-slate-400 hover:text-white border border-dark-600 px-2 py-0.5 rounded hover:bg-dark-700">Copy Command</button>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 text-[11px] text-slate-400 pt-1">
+          <span>Live App Metrics: <a href="/metrics" target="_blank" class="text-emerald-400 underline font-mono">/metrics (Active)</a></span>
+          <span class="text-slate-500">|</span>
+          <span>Grafana Credentials: <code class="text-white font-mono">admin</code> / <code class="text-white font-mono">admin</code></span>
+          <span class="text-slate-500">|</span>
+          <button onclick="probeAndOpenGrafana()" class="text-blue-400 hover:text-blue-300 underline text-[11px]">Check & Open Port 3000</button>
+        </div>
+        <div id="grafanaProbeMsg" class="hidden text-[11px] p-2.5 rounded-lg bg-amber-950/60 border border-amber-800 text-amber-200"></div>
+      </div>
+
+      <!-- Close Button -->
+      <div class="flex justify-end pt-2">
+        <button onclick="closeTelemetryModal()" class="px-5 py-2 bg-dark-700 hover:bg-dark-600 text-white text-xs font-semibold rounded-xl border border-dark-600 transition-all">
+          Close Telemetry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') ? 'http://localhost:8000' : '';
+    const PRESETS = [
+      "Compare Microsoft's and Alphabet's operating margins over the last three fiscal years, and tell me what changed in their risk factors.",
+      "Compare Apple and NVIDIA operating margins over the last three fiscal years and summarize their Item 1A regulatory and supply chain risk shifts.",
+      "Compare Amazon and Meta operating margins over the last three fiscal years and summarize Item 1A capex and digital advertising risks.",
+      "Compare Visa and Mastercard operating margins over the last three fiscal years and explain Item 1A cross-border and sovereign payment rail risks.",
+      "Compare JPMorgan Chase and Bank of America operating margins over the last three fiscal years and summarize Item 1A interest rate and credit risks.",
+      "Compare Tesla and Oracle operating margins over the last three fiscal years and analyze Item 1A regulatory and cloud infrastructure shifts.",
+      "Compare Walmart and Amazon operating margins over the last three fiscal years and summarize Item 1A supply chain and retail tariff disclosures.",
+      "Compare American Express and Visa operating margins over the last three fiscal years and explain Item 1A cardmember credit and interchange risks."
+    ];
+    let currentRun = null;
+    let metricsTimer = null;
+
+    async function openGrafanaTelemetry() {
+      const modal = document.getElementById('telemetryModal');
+      if (modal) modal.classList.remove('hidden');
+      await refreshLiveMetrics();
+      if (!metricsTimer) {
+        metricsTimer = setInterval(refreshLiveMetrics, 3000);
+      }
+    }
+
+    function closeTelemetryModal() {
+      const modal = document.getElementById('telemetryModal');
+      if (modal) modal.classList.add('hidden');
+      if (metricsTimer) {
+        clearInterval(metricsTimer);
+        metricsTimer = null;
+      }
+    }
+
+    async function probeAndOpenGrafana() {
+      const msgEl = document.getElementById('grafanaProbeMsg');
+      if (msgEl) {
+        msgEl.classList.remove('hidden');
+        msgEl.textContent = 'Checking if Grafana is running on port 3000...';
+      }
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
+        await fetch('http://localhost:3000/api/health', { mode: 'no-cors', signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (msgEl) msgEl.classList.add('hidden');
+        window.open('http://localhost:3000', '_blank');
+      } catch (err) {
+        if (msgEl) {
+          msgEl.innerHTML = '⚠️ <strong>Port 3000 is offline.</strong> Grafana is not running because Docker Desktop is not started on this laptop.<br>No problem: <strong>all live telemetry is actively running and visible in this window above!</strong>';
+        }
+      }
+    }
+
+    async function refreshLiveMetrics() {
+      try {
+        const res = await fetch(`${API_BASE}/metrics`);
+        if (!res.ok) return;
+        const text = await res.text();
+
+        let totalReqs = 0;
+        let ok200 = 0;
+        let errors = 0;
+        let activeJobs = 0;
+        let latencySum = 0;
+        let latencyCount = 0;
+        const endpoints = [];
+
+        const lines = text.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('#')) continue;
+          if (line.startsWith('app_requests_total{')) {
+            const match = line.match(/endpoint="([^"]+)",status="([^"]+)"\}\s+([0-9.]+)/);
+            if (match) {
+              const ep = match[1];
+              const st = match[2];
+              const val = parseFloat(match[3]) || 0;
+              totalReqs += val;
+              if (st.startsWith('2')) ok200 += val;
+              else if (st.startsWith('4') || st.startsWith('5')) errors += val;
+              endpoints.push({ endpoint: ep, status: st, count: val });
+            }
+          } else if (line.startsWith('app_active_jobs ')) {
+            const parts = line.trim().split(/\s+/);
+            activeJobs = parseFloat(parts[1]) || 0;
+          } else if (line.startsWith('app_processing_seconds_sum')) {
+            const parts = line.trim().split(/\s+/);
+            latencySum += parseFloat(parts[1]) || 0;
+          } else if (line.startsWith('app_processing_seconds_count')) {
+            const parts = line.trim().split(/\s+/);
+            latencyCount += parseFloat(parts[1]) || 0;
+          }
+        }
+
+        const elTotal = document.getElementById('statReqTotal');
+        if (elTotal) elTotal.textContent = totalReqs;
+        const elBreakdown = document.getElementById('statReqBreakdown');
+        if (elBreakdown) elBreakdown.textContent = `200 OK: ${ok200} | Errors: ${errors}`;
+        const elJobs = document.getElementById('statActiveJobs');
+        if (elJobs) elJobs.textContent = activeJobs;
+        const elAvg = document.getElementById('statAvgLatency');
+        if (elAvg) {
+          elAvg.textContent = latencyCount > 0 ? (latencySum / latencyCount).toFixed(2) + 's' : '0.0s';
+        }
+
+        const tbody = document.getElementById('telemetryEndpointsTable');
+        if (tbody) {
+          if (endpoints.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-500">No requests recorded yet. Click presets or run queries to generate traffic!</td></tr>`;
+          } else {
+            tbody.innerHTML = endpoints.map(e => `
+              <tr class="hover:bg-dark-800/60 transition-colors">
+                <td class="p-3 text-blue-300 font-semibold">${e.endpoint}</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${e.status === '200' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-red-950 text-red-400 border border-red-800'}">${e.status}</span></td>
+                <td class="p-3 text-right font-bold text-white">${e.count}</td>
+              </tr>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to refresh metrics:', err);
+      }
+    }
+
+    function setPreset(i) {
+      document.getElementById('queryInput').value = PRESETS[i];
+    }
+
+    function switchTab(tab) {
+      ['overview', 'desk', 'portal', 'eval', 'memory'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById(`nav-${t}`);
+        if (t === tab) {
+          btn.className = 'nav-btn px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow-sm transition-all';
+        } else {
+          btn.className = 'nav-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all';
+        }
+      });
+      if (tab === 'portal') loadPortal();
+    }
+
+    function switchSubTab(sub) {
+      ['note', 'quant', 'risks', 'trace'].forEach(s => {
+        document.getElementById(`panel-${s}`).classList.toggle('hidden', s !== sub);
+        const btn = document.getElementById(`sub-${s}`);
+        if (s === sub) {
+          btn.className = 'sub-btn px-4 py-2 rounded-lg bg-blue-600 text-white shadow-sm transition-all';
+        } else {
+          btn.className = 'sub-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all';
+        }
+      });
+    }
+
+    function resetDesk() {
+      currentRun = null;
+      document.getElementById('pipelineCard').classList.add('hidden');
+      document.getElementById('planInterruptCard').classList.add('hidden');
+      document.getElementById('outputWorkspace').classList.add('hidden');
+      document.getElementById('errorBox').classList.add('hidden');
+      switchTab('overview');
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('errorBox');
+      if (String(msg).includes('Failed to fetch') || String(msg).includes('NetworkError')) {
+        box.innerHTML = `<strong>Backend Server Not Reachable:</strong> Could not connect to API server at <code>${API_BASE || window.location.origin}</code>.
+          <br/><br/>
+          <strong>Resolution:</strong>
+          <br/>1. Run <code>start.bat</code> in the terminal and keep it open.
+          <br/>2. Open the app at <a href="http://localhost:8000" target="_blank" class="underline text-blue-400 font-bold">http://localhost:8000</a> (do not open raw <code>file:///...index.html</code>).`;
+      } else {
+        box.textContent = msg;
+      }
+      box.classList.remove('hidden');
+    }
+
+    async function startResearch() {
+      document.getElementById('errorBox').classList.add('hidden');
+      const btn = document.getElementById('btnStart');
+      btn.disabled = true;
+      btn.innerHTML = 'Planning...';
+      try {
+        const res = await fetch(`${API_BASE}/api/runs/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: document.getElementById('queryInput').value,
+            tokenBudget: Number(document.getElementById('tokenBudget').value)
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Start failed');
+        currentRun = data.run;
+        renderRunState();
+      } catch (e) {
+        showError(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Draft Research Plan</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>';
+      }
+    }
+
+    async function approvePlan() {
+      if (!currentRun) return;
+      const btn = document.getElementById('btnApprovePlan');
+      btn.disabled = true;
+      btn.textContent = 'Running Parallel Agents & Critic...';
+      try {
+        const editedPlan = {
+          title: document.getElementById('planTitle').value,
+          tickers: document.getElementById('planTickers').value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
+          subQuestions: document.getElementById('planSubQuestions').value.split('\n').map(s => s.trim()).filter(Boolean)
+        };
+        const res = await fetch(`${API_BASE}/api/runs/${currentRun.runId}/approve-plan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: editedPlan })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Execution failed');
+        currentRun = data.run;
+        renderRunState();
+      } catch (e) {
+        showError(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Approve Plan & Execute Parallel Workers';
+      }
+    }
+
+    async function publishNote() {
+      if (!currentRun) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/runs/${currentRun.runId}/publish`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            analystName: document.getElementById('analystNameInput').value,
+            attestation: document.getElementById('attestationInput').value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Publish blocked');
+        currentRun = data.run;
+        renderRunState();
+      } catch (e) {
+        showError(e.message);
+      }
+    }
+
+    function renderRunState() {
+      if (!currentRun) return;
+      switchTab('desk');
+      document.getElementById('pipelineCard').classList.remove('hidden');
+      document.getElementById('runIdLabel').textContent = currentRun.runId;
+      document.getElementById('elapsedLabel').textContent = `${(currentRun.elapsedMs / 1000).toFixed(2)}s elapsed`;
+      document.getElementById('budgetLabel').textContent = `Tokens: ${currentRun.tokenUsed.toLocaleString()} / ${currentRun.tokenBudget.toLocaleString()} ($${currentRun.estimatedCostUsd.toFixed(4)})`;
+
+      const stages = [
+        ['1. Input Guardrails', 'Scope & data isolation'],
+        ['2. Lead + Edit Interrupt', 'Plan & token budget'],
+        ['3-5. Parallel Fan-Out', 'Filings + FinRobot + Risk'],
+        ['6. Writer & Critic Loop', 'Code audit (max 2 revs)'],
+        ['7. Approval Gate', 'Sign & publish_note']
+      ];
+      document.getElementById('stageGrid').innerHTML = stages.map(([title, desc]) => `
+        <div class="p-3 rounded-xl border border-dark-600 bg-dark-900">
+          <div class="font-semibold text-white">${title}</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">${desc}</div>
+        </div>
+      `).join('');
+
+      if (currentRun.status === 'rejected') {
+        showError(currentRun.errorMessage || 'Blocked by input guardrails.');
+        return;
+      }
+
+      if (currentRun.status === 'awaiting_plan_approval' && currentRun.plan) {
+        document.getElementById('planInterruptCard').classList.remove('hidden');
+        document.getElementById('outputWorkspace').classList.add('hidden');
+        document.getElementById('planTitle').value = currentRun.plan.title;
+        document.getElementById('planTickers').value = currentRun.plan.tickers.join(', ');
+        document.getElementById('fiscalWarningBox').textContent = `Fiscal Alignment Note: ${currentRun.plan.fiscalMismatchWarning}`;
+        document.getElementById('planSubQuestions').value = currentRun.plan.subQuestions.join('\n');
+        return;
+      }
+
+      document.getElementById('planInterruptCard').classList.add('hidden');
+      document.getElementById('outputWorkspace').classList.remove('hidden');
+
+      document.getElementById('renderedNote').innerHTML = renderMarkdownWithTables(currentRun.draftMarkdown);
+
+      if (currentRun.outputGuardrail) {
+        document.getElementById('guardrailSummary').textContent =
+          `${currentRun.outputGuardrail.factIdCoveragePct}% Fact-ID Verified · ${currentRun.outputGuardrail.adviceLanguageDetected ? 'Advice Flagged' : 'Zero Advice Violations'}`;
+      }
+
+      const lastC = currentRun.complianceHistory[currentRun.complianceHistory.length - 1];
+      if (lastC) {
+        document.getElementById('complianceStats').innerHTML = `
+          <div class="flex justify-between text-slate-300"><span>Numbers Verified (Code)</span><span class="font-mono font-semibold text-white">${lastC.verifiedCount} / ${lastC.totalNumbersCount}</span></div>
+          <div class="flex justify-between text-slate-300"><span>Return-Promise Scan</span><span class="font-semibold text-emerald-400">${lastC.adviceCheckPassed ? 'Clean' : 'Violation'}</span></div>
+        `;
+      }
+
+      if (currentRun.status === 'published' && currentRun.signature) {
+        document.getElementById('signForm').classList.add('hidden');
+        const b = document.getElementById('publishedBanner');
+        b.classList.remove('hidden');
+        b.innerHTML = `<strong>Signed & Published to Portal</strong><br/>Signed by ${currentRun.signature.analystName}<br/><span class="font-mono text-blue-400">${currentRun.publishedNoteId}</span>`;
+      } else {
+        document.getElementById('signForm').classList.remove('hidden');
+        document.getElementById('publishedBanner').classList.add('hidden');
+      }
+
+      document.getElementById('quantTableBody').innerHTML = currentRun.quant.flatMap(q =>
+        q.rows.map(r => `
+          <tr class="hover:bg-dark-900/50 transition-colors">
+            <td class="px-5 py-3.5 font-medium text-white">${q.ticker} <span class="block text-[10px] text-slate-400">FY ends ${q.fiscalYearEndMonth}</span></td>
+            <td class="px-5 py-3.5 font-mono text-xs text-slate-300">FY${r.fiscalYear}</td>
+            <td class="px-5 py-3.5 font-mono text-xs text-slate-400">${r.periodEnd}</td>
+            <td class="px-5 py-3.5 text-right font-mono text-slate-200">$${r.revenueB.toFixed(2)}B</td>
+            <td class="px-5 py-3.5 text-right font-mono text-slate-200">$${r.operatingIncomeB.toFixed(2)}B</td>
+            <td class="px-5 py-3.5 text-right font-mono font-semibold text-blue-400">${r.operatingMarginPct.toFixed(2)}%</td>
+            <td class="px-5 py-3.5 text-right font-mono text-xs text-slate-300">${r.marginDeltaBps !== null ? (r.marginDeltaBps > 0 ? '+' : '') + r.marginDeltaBps + ' bps' : '-'}</td>
+            <td class="px-5 py-3.5 text-xs space-y-1">
+              <span class="block font-mono text-[10px] text-slate-400">Regime: ${q.finrlRiskRegime?.regimeLabel || 'N/A'}</span>
+              <div class="flex flex-wrap gap-1">
+                <button class="fact-badge" onclick="inspectFact('${r.revenueFactId}')">${r.revenueFactId.replace('FACT:', '')}</button>
+                <button class="fact-badge" onclick="inspectFact('${r.operatingIncomeFactId}')">${r.operatingIncomeFactId.replace('FACT:', '')}</button>
+              </div>
+            </td>
+          </tr>
+        `)
+      ).join('');
+
+      document.getElementById('panel-risks').innerHTML = currentRun.riskDiffs.map(d => `
+        <div class="p-6 space-y-2">
+          <div class="text-[11px] font-mono font-semibold text-amber-400">${d.ticker} · ${d.changeType} · FY${d.priorYear} → FY${d.currentYear}</div>
+          <div class="text-sm font-bold text-white">${d.riskTitle}</div>
+          <p class="text-xs text-slate-300 leading-relaxed">${d.summary}</p>
+        </div>
+      `).join('');
+
+      document.getElementById('panel-trace').innerHTML = currentRun.traces.map(t => `
+        <div class="py-2.5 border-b border-dark-600 text-xs flex justify-between gap-4">
+          <div><span class="font-mono font-semibold text-blue-400">${t.node}</span>: <span class="text-slate-300">${t.message}</span></div>
+          <span class="font-mono text-slate-500 shrink-0">${t.hookType}</span>
+        </div>
+      `).join('');
+    }
+
+    function inspectFact(factId) {
+      const f = currentRun?.factsRegistry?.[factId];
+      document.getElementById('drawerTitle').textContent = 'SEC EDGAR XBRL Fact Audit';
+      document.getElementById('drawerBody').innerHTML = f ? `
+        <div class="font-mono bg-dark-900 p-3 border border-dark-600 rounded-xl text-blue-400">${f.factId}</div>
+        <div><strong class="text-slate-300">Company:</strong> <span class="text-white">${f.companyName} (CIK ${f.cik})</span></div>
+        <div><strong class="text-slate-300">Concept:</strong> <span class="font-mono text-slate-200">${f.concept}</span></div>
+        <div><strong class="text-slate-300">Reported USD:</strong> <span class="font-mono text-white">$${Number(f.value).toLocaleString()} ($${f.valueBillions.toFixed(2)}B)</span></div>
+        <div><strong class="text-slate-300">Period:</strong> <span class="font-mono text-slate-200">${f.periodStart} to ${f.periodEnd}</span></div>
+        <div><strong class="text-slate-300">Accession:</strong> <span class="font-mono text-slate-200">${f.accession}</span></div>
+        <div><strong class="text-slate-300">Source:</strong> <span class="text-slate-200">${f.sourceType}</span></div>
+      ` : `<div>Fact ${factId} not found in registry.</div>`;
+      document.getElementById('evidenceDrawer').classList.remove('hidden');
+    }
+
+    function inspectPassage(passageId) {
+      const p = currentRun?.passagesRegistry?.[passageId];
+      document.getElementById('drawerTitle').textContent = 'Form 10-K Passage Evidence';
+      document.getElementById('drawerBody').innerHTML = p ? `
+        <div class="font-mono bg-dark-900 p-3 border border-dark-600 rounded-xl text-slate-300">${p.passageId}</div>
+        <div class="font-semibold text-white text-sm">${p.title}</div>
+        <div class="p-3.5 bg-dark-900 border border-dark-600 rounded-xl leading-relaxed text-slate-200">${p.text}</div>
+        <div class="text-slate-400 italic">${p.sourceLabel}</div>
+      ` : `<div>Passage ${passageId} not found.</div>`;
+      document.getElementById('evidenceDrawer').classList.remove('hidden');
+    }
+
+    function closeDrawer() {
+      document.getElementById('evidenceDrawer').classList.add('hidden');
+    }
+
+    async function loadPortal() {
+      const res = await fetch(`${API_BASE}/api/portal/notes`);
+      const data = await res.json();
+      document.getElementById('portalList').innerHTML = (data.notes || []).map(n => `
+        <div class="py-5 space-y-2">
+          <div class="text-xs font-mono text-blue-400">${n.noteId} · ${n.tickers.join(' / ')} · Signed by ${n.analystName}</div>
+          <div class="text-base font-bold text-white">${n.title}</div>
+          <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">${n.markdown}</p>
+        </div>
+      `).join('');
+    }
+
+    async function runBenchmark() {
+      const out = document.getElementById('benchmarkOutput');
+      out.textContent = 'Running benchmark...';
+      const res = await fetch(`${API_BASE}/api/eval/benchmark`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runId: currentRun?.runId })
+      });
+      const { benchmark } = await res.json();
+      out.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="w-full border border-dark-600 text-xs tabular-nums rounded-xl overflow-hidden">
+            <tr class="bg-dark-900 border-b border-dark-600 text-slate-400 uppercase"><th class="text-left p-3">Architecture</th><th class="text-right p-3">Verified Numbers</th><th class="text-right p-3">Risk Diffs</th><th class="text-right p-3">Tokens</th><th class="text-right p-3">Cost</th></tr>
+            ${[benchmark.multiAgent, benchmark.singleAgent].map(r => `
+              <tr class="border-b border-dark-600 hover:bg-dark-900/50"><td class="p-3 font-medium text-white">${r.label}</td><td class="p-3 text-right font-mono text-emerald-400 font-semibold">${r.verifiedNumbersPct}%</td><td class="p-3 text-right font-mono text-slate-200">${r.riskDiffItemsFound}</td><td class="p-3 text-right font-mono text-slate-200">${r.tokensUsed.toLocaleString()}</td><td class="p-3 text-right font-mono text-slate-200">$${r.estimatedCostUsd.toFixed(4)}</td></tr>
+            `).join('')}
+          </table>
+        </div>
+        <p class="mt-4 text-slate-300 leading-relaxed">${benchmark.winnerSummary}</p>
+      `;
+    }
+
+    async function runXbrlEval() {
+      const out = document.getElementById('evalOutput');
+      out.textContent = 'Evaluating SEC EDGAR XBRL truth...';
+      const res = await fetch(`${API_BASE}/api/eval/xbrl`, { method: 'POST' });
+      const raw = await res.json();
+      const data = raw.results || raw;
+      out.innerHTML = `
+        <div class="mb-3 font-semibold text-emerald-400 text-sm">Pass Rate: ${data.passRatePct}% (${data.passedCount}/${data.totalCount})</div>
+        <div class="overflow-x-auto">
+          <table class="w-full border border-dark-600 text-xs tabular-nums rounded-xl overflow-hidden">
+            <tr class="bg-dark-900 border-b border-dark-600 text-slate-400 uppercase"><th class="text-left p-3">Case</th><th class="text-left p-3">Question</th><th class="text-right p-3">Expected</th><th class="text-right p-3">Sandbox</th><th class="text-left p-3">Fact ID</th></tr>
+            ${data.results.map(r => `<tr class="border-b border-dark-600 hover:bg-dark-900/50"><td class="p-3 font-mono text-slate-400">${r.id}</td><td class="p-3 text-slate-200">${r.question}</td><td class="p-3 text-right font-mono text-slate-300">${r.expectedValueText}</td><td class="p-3 text-right font-mono font-semibold text-white">${r.computedValueText}</td><td class="p-3 font-mono text-blue-400">${r.factId}</td></tr>`).join('')}
+          </table>
+        </div>
+      `;
+    }
+
+    async function askMemory() {
+      const res = await fetch(`${API_BASE}/api/memory/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: document.getElementById('memoryQuestion').value })
+      });
+      const data = await res.json();
+      document.getElementById('memoryAnswer').textContent = data.answer;
+    }
+
+    async function runRedTeam() {
+      const out = document.getElementById('redTeamOutput');
+      out.textContent = 'Running red-team attack probes against guardrails...';
+      try {
+        const res = await fetch(`${API_BASE}/api/eval/red-team`, { method: 'POST' });
+        const data = await res.json();
+        out.innerHTML = `
+          <div class="mb-3 font-semibold text-emerald-400 text-sm">Guardrail Defense Rate: ${data.passRatePct}% (${data.blockedCount}/${data.totalProbes} Probes Neutralized)</div>
+          <div class="overflow-x-auto">
+            <table class="w-full border border-dark-600 text-xs tabular-nums rounded-xl overflow-hidden">
+              <tr class="bg-dark-900 border-b border-dark-600 text-slate-400 uppercase font-semibold">
+                <th class="text-left p-3">Attack Probe</th>
+                <th class="text-center p-3">Defense Status</th>
+                <th class="text-left p-3">Detected Policy Violation</th>
+              </tr>
+              ${data.results.map(r => `
+                <tr class="border-b border-dark-600 hover:bg-dark-900/50">
+                  <td class="p-3 text-slate-200 font-mono text-[11px]">${r.probe}</td>
+                  <td class="p-3 text-center"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${r.blocked ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-red-950 text-red-300'}">${r.blocked ? 'BLOCKED ✓' : 'FAILED ✗'}</span></td>
+                  <td class="p-3 text-slate-400 text-[11px]">${[...r.injectionFlags, ...r.adviceFlags, (r.unverifiedNumbers > 0 ? `${r.unverifiedNumbers} unverified figure(s)` : '')].filter(Boolean).join('; ') || 'Blocked by input filter'}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+        `;
+      } catch (e) {
+        out.textContent = 'Red-team audit failed: ' + e.message;
+      }
+    }
+
+    function renderMarkdownWithTables(src) {
+      if (!src) return '';
+      const lines = src.split('\n');
+      let out = '';
+      let inTable = false;
+      let tableRows = [];
+
+      function flushTable() {
+        if (tableRows.length === 0) return;
+        let html = '<div class="overflow-x-auto my-4"><table class="w-full border border-dark-600 text-xs tabular-nums rounded-xl overflow-hidden text-left">';
+        tableRows.forEach((row, idx) => {
+          if (row.every(c => /^[-: ]+$/.test(c))) return;
+          if (idx === 0) {
+            html += '<thead class="bg-dark-900 border-b border-dark-600 text-slate-400 uppercase font-semibold"><tr>';
+            row.forEach(c => { html += `<th class="p-3 text-left">${c}</th>`; });
+            html += '</tr></thead><tbody>';
+          } else {
+            html += '<tr class="border-b border-dark-600 hover:bg-dark-900/50">';
+            row.forEach(c => { html += `<td class="p-3">${c}</td>`; });
+            html += '</tr>';
+          }
+        });
+        html += '</tbody></table></div>';
+        out += html;
+        tableRows = [];
+        inTable = false;
+      }
+
+      for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i];
+        const trimmed = rawLine.trim();
+
+        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+          inTable = true;
+          const cols = trimmed.split('|').slice(1, -1).map(c => {
+            let cell = c.trim()
+              .replace(/\[FACT:([^\]]+)\]/g, (_, id) => `<button class="fact-badge" onclick="inspectFact('FACT:${id}')">${id}</button>`)
+              .replace(/\[PASSAGE:([^\]]+)\]/g, (_, id) => `<button class="passage-badge" onclick="inspectPassage('PASSAGE:${id}')">${id}</button>`)
+              .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+            return cell;
+          });
+          tableRows.push(cols);
+          continue;
+        }
+
+        if (inTable) {
+          flushTable();
+        }
+
+        if (trimmed.startsWith('### ')) {
+          out += `<h3 class="text-base font-bold text-white pt-4 pb-1 border-t border-dark-600 mt-4 mb-2">${trimmed.slice(4)}</h3>`;
+        } else if (trimmed.startsWith('## ')) {
+          out += `<h2 class="text-lg font-bold text-white tracking-tight mt-5 mb-2">${trimmed.slice(3)}</h2>`;
+        } else if (trimmed.startsWith('- ')) {
+          let item = trimmed.slice(2)
+            .replace(/\[FACT:([^\]]+)\]/g, (_, id) => `<button class="fact-badge" onclick="inspectFact('FACT:${id}')">${id}</button>`)
+            .replace(/\[PASSAGE:([^\]]+)\]/g, (_, id) => `<button class="passage-badge" onclick="inspectPassage('PASSAGE:${id}')">${id}</button>`)
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+          out += `<li class="text-xs text-slate-300 leading-relaxed ml-4 my-1 list-disc">${item}</li>`;
+        } else if (trimmed === '') {
+          out += '<div class="h-2"></div>';
+        } else {
+          let p = trimmed
+            .replace(/\[FACT:([^\]]+)\]/g, (_, id) => `<button class="fact-badge" onclick="inspectFact('FACT:${id}')">${id}</button>`)
+            .replace(/\[PASSAGE:([^\]]+)\]/g, (_, id) => `<button class="passage-badge" onclick="inspectPassage('PASSAGE:${id}')">${id}</button>`)
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+          out += `<p class="text-xs text-slate-300 leading-relaxed my-1.5">${p}</p>`;
+        }
+      }
+      if (inTable) flushTable();
+      return out;
+    }
+  </script>
+</body>
+</html>

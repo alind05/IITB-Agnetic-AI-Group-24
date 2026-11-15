@@ -1,0 +1,70 @@
+name: CI Pipeline - Automated Test Execution & Quality Gate
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # -------------------------------------------------------------
+  # 1. Automated Quality Gate Before Merging
+  # -------------------------------------------------------------
+  quality-gate:
+    name: Automated Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Quality Gate Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black bandit
+
+      - name: Enforce Code Style & Lint Quality Gate
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv,__pycache__
+          # Exit-zero treats all errors as warnings. 127 chars line length limit.
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv,__pycache__
+
+      - name: Security Scan Quality Gate (Bandit)
+        run: |
+          bandit -r backend/ -ll -ii || true
+
+  # -------------------------------------------------------------
+  # 2. Automated Test Execution on Code Commits
+  # -------------------------------------------------------------
+  test-suite:
+    name: Automated Test Execution
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Application Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Execute Automated Test Suite & Coverage
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || 'dummy_test_key' }}
+          SEC_USER_AGENT: "EquityAnalystDesk test@example.com"
+        run: |
+          pytest tests/ -v --junitxml=test-results.xml

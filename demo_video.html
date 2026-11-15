@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyst Desk — Institutional Demo Walkthrough (IIT Bombay)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #020617;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 960px;
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 16px;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #ffffff;
+      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+    }
+    .title-group h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    .title-group p {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .badge-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-emerald {
+      background: rgba(6, 78, 59, 0.7);
+      border: 1px solid #059669;
+      color: #6ee7b7;
+    }
+    .badge-red {
+      background: rgba(127, 29, 29, 0.7);
+      border: 1px solid #dc2626;
+      color: #fca5a5;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .video-wrapper {
+      position: relative;
+      background: #000000;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-play {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-play:hover { background: #1d4ed8; }
+    .audio-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .narration-banner {
+      background: rgba(30, 58, 138, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .narration-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+    .narration-content {
+      flex: 1;
+    }
+    .narration-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .narration-title {
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #60a5fa;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .time-badge {
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #94a3b8;
+    }
+    .narration-text {
+      font-size: 13px;
+      color: #f1f5f9;
+      line-height: 1.5;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 720px) {
+      .timeline-grid { grid-template-columns: 1fr; }
+    }
+    .step-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .step-card:hover {
+      border-color: #60a5fa;
+      color: #f1f5f9;
+    }
+    .step-card.active {
+      border-color: #3b82f6;
+      background: rgba(37, 99, 235, 0.2);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+    }
+    .step-card.active-red {
+      border-color: #ef4444;
+      background: rgba(220, 38, 38, 0.2);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+    }
+    .step-time {
+      display: block;
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 2px;
+    }
+    .step-card.active-red .step-time { color: #f87171; }
+    .audit-section {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .audit-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .audit-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .audit-stat {
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(6, 78, 59, 0.6);
+      border: 1px solid #059669;
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+    .audit-desc {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .audit-img-wrapper {
+      border: 1px solid #334155;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000000;
+    }
+    .audit-img-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="logo-badge">AD</div>
+        <div class="title-group">
+          <h1>Analyst Desk: Verifiable Equity Research Platform</h1>
+          <p>IIT Bombay Capstone Walkthrough &bull; Natural Studio Voiceover &bull; Red-Team Security Defense</p>
+        </div>
+      </div>
+      <div class="badge-group">
+        <a href="telemetry_dashboard.html" target="_blank" class="badge" style="background: rgba(244, 121, 32, 0.2); border: 1px solid #f47920; color: #ff9d54; text-decoration: none;" title="Open Standalone Grafana Live Metrics Dashboard">
+          <span class="pulse-dot" style="background: #f47920;"></span>
+          📊 Grafana Dashboard
+        </a>
+        <div class="badge badge-emerald">
+          <span class="pulse-dot"></span>
+          100% Fact-Verified
+        </div>
+        <div class="badge badge-red">
+          <span class="pulse-dot"></span>
+          L15 Guardrails: 100% Neutralized
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Player Container -->
+    <div class="video-wrapper">
+      <video id="demoVideo" controls playsinline>
+        <source src="analyst_desk_demo.webm" type="video/webm">
+        <p>Your browser does not support WebM video. Please open <code>analyst_desk_browser_demo.gif</code> instead.</p>
+      </video>
+      <audio id="demoAudio" src="narration.mp3" preload="auto"></audio>
+    </div>
+
+    <!-- Play Controls & Audio Status Bar -->
+    <div class="controls-bar">
+      <button id="btnPlayMaster" class="btn-play" onclick="togglePlay()">
+        <span id="playIcon">▶</span> <span id="playLabel">Play Walkthrough</span>
+      </button>
+      <div class="audio-status">
+        <span>🎙️ Realistic Neural Voice: <strong>en-US-Brian (Microsoft Azure)</strong></span>
+        <span>&bull;</span>
+        <span id="audioSyncStatus">Audio Auto-Synced</span>
+      </div>
+    </div>
+
+    <!-- Narration Subtitles Banner -->
+    <div class="narration-banner">
+      <div class="narration-icon">🎙️</div>
+      <div class="narration-content">
+        <div class="narration-header">
+          <span class="narration-title">Synchronized Narration Transcript</span>
+          <span id="timeLabel" class="time-badge">00:00 / 01:01</span>
+        </div>
+        <p id="subtitleText" class="narration-text">
+          Click "Play Walkthrough" or press Play on the video above to begin the institutional walkthrough.
+        </p>
+      </div>
+    </div>
+
+    <!-- 5-Stage Step Progress Markers -->
+    <div class="timeline-grid">
+      <div id="step-1" class="step-card" onclick="seekTo(0)">
+        <span class="step-time">00:00 - 00:13</span>
+        <strong>1. System Architecture</strong>
+      </div>
+      <div id="step-2" class="step-card" onclick="seekTo(13)">
+        <span class="step-time">00:13 - 00:22</span>
+        <strong>2. V vs MA Selection</strong>
+      </div>
+      <div id="step-3" class="step-card" onclick="seekTo(22)">
+        <span class="step-time">00:22 - 00:31</span>
+        <strong>3. Lead Planner HITL</strong>
+      </div>
+      <div id="step-4" class="step-card" onclick="seekTo(31)">
+        <span class="step-time">00:31 - 00:44</span>
+        <strong>4. Parallel Python Math</strong>
+      </div>
+      <div id="step-5" class="step-card" onclick="seekTo(44)">
+        <span class="step-time" style="color: #f87171;">00:44 - 01:01</span>
+        <strong style="color: #fca5a5;">5. L15 Red-Team Audit</strong>
+      </div>
+    </div>
+
+    <!-- L15 Red-Team Guardrail Audit Highlight -->
+    <div class="audit-section">
+      <div class="audit-header">
+        <div class="audit-title">
+          <span class="pulse-dot" style="background:#34d399;"></span>
+          Red-Team & Security Guardrail Audit (L15) — Ground Truth Results
+        </div>
+        <div class="audit-stat">100% Defense Rate (3/3 Probes Neutralized)</div>
+      </div>
+      <p class="audit-desc">
+        Deterministic regex & policy filters intercepting prompt injections, broker-dealer "Strong Buy" directives, personalized advice, and hallucinated figures:
+      </p>
+      <div class="audit-img-wrapper">
+        <img src="red_team_audit_proof.png" alt="Red-Team Security Guardrail Audit Proof" />
+      </div>
+    </div>
+
+    <div class="footer">
+      Analyst Desk &bull; Capstone Submission for IIT Bombay &bull; Completely Self-Contained Local Package
+    </div>
+  </div>
+
+  <script>
+    const vid = document.getElementById('demoVideo');
+    const aud = document.getElementById('demoAudio');
+    const sub = document.getElementById('subtitleText');
+    const timeLabel = document.getElementById('timeLabel');
+    const playIcon = document.getElementById('playIcon');
+    const playLabel = document.getElementById('playLabel');
+
+    function togglePlay() {
+      if (vid.paused) {
+        vid.play();
+      } else {
+        vid.pause();
+      }
+    }
+
+    function seekTo(sec) {
+      vid.currentTime = sec;
+      aud.currentTime = sec;
+      vid.play();
+    }
+
+    vid.addEventListener('play', () => {
+      aud.currentTime = vid.currentTime;
+      aud.play().catch(() => {});
+      playIcon.textContent = '⏸';
+      playLabel.textContent = 'Pause Walkthrough';
+    });
+
+    vid.addEventListener('pause', () => {
+      aud.pause();
+      playIcon.textContent = '▶';
+      playLabel.textContent = 'Resume Walkthrough';
+    });
+
+    vid.addEventListener('seeked', () => {
+      aud.currentTime = vid.currentTime;
+    });
+
+    function fmt(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    }
+
+    vid.addEventListener('timeupdate', () => {
+      const t = vid.currentTime;
+      const dur = vid.duration || 61.5;
+      timeLabel.textContent = `${fmt(t)} / ${fmt(dur)}`;
+
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`step-${i}`).classList.remove('active', 'active-red');
+      }
+
+      if (t < 13) {
+        document.getElementById('step-1').classList.add('active');
+        sub.textContent = "Welcome to Analyst Desk — our verifiable equity research platform built for IIT Bombay. The system pairs LLM reasoning with deterministic SEC XBRL ingestion and sandbox math.";
+      } else if (t < 22) {
+        document.getElementById('step-2').classList.add('active');
+        sub.textContent = "Moving to the Research Desk, we analyze peer equity groups across fourteen companies. Here, we select Visa versus Mastercard.";
+      } else if (t < 31) {
+        document.getElementById('step-3').classList.add('active');
+        sub.textContent = "The LangGraph Lead Planner decomposes the research query into verifiable sub-questions, waiting for analyst approval before spending execution budget.";
+      } else if (t < 44) {
+        document.getElementById('step-4').classList.add('active');
+        sub.textContent = "Parallel workers fetch audited SEC filings, computing operating margins and growth rates in a secure Python sandbox, complete with interactive fact badges linking back to EDGAR accession numbers.";
+      } else if (t < 58) {
+        document.getElementById('step-5').classList.add('active-red');
+        sub.textContent = "Finally, in our Eval Suite, we run the L15 Red-Team Security Audit. Live attack probes for prompt injection and unauthorized investment advice are neutralized with a one hundred percent defense rate, ensuring institutional safety.";
+      } else {
+        document.getElementById('step-5').classList.add('active-red');
+        sub.textContent = "This concludes our live walkthrough of Analyst Desk.";
+      }
+    });
+
+    vid.addEventListener('ended', () => {
+      aud.pause();
+      playIcon.textContent = '🔄';
+      playLabel.textContent = 'Replay Walkthrough';
+    });
+  </script>
+</body>
+</html>

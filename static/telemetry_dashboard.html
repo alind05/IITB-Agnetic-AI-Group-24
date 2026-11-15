@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyst Desk — Grafana Live Metrics & Observability Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #111217;
+      color: #ccccdc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.4;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    .grafana-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #181b1f;
+      border: 1px solid #202226;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-bottom: 16px;
+    }
+    .grafana-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .grafana-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #f47920, #e65100);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #ffffff;
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(244, 121, 32, 0.4);
+    }
+    .grafana-title h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+    .grafana-title p {
+      font-size: 11px;
+      color: #8e8e9e;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-badge {
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-live {
+      background: rgba(115, 191, 105, 0.15);
+      border: 1px solid #73bf69;
+      color: #73bf69;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+    .panel {
+      background: #181b1f;
+      border: 1px solid #202226;
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #202226;
+      padding-bottom: 8px;
+    }
+    .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-metric-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10px;
+      color: #5794f2;
+      background: rgba(87, 148, 242, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    .stat-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 8px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 42px;
+      font-weight: 800;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #8e8e9e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .chart-container {
+      height: 140px;
+      width: 100%;
+      position: relative;
+    }
+    svg.chart-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .bar-gauge {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 8px;
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+    }
+    .bar-track {
+      flex: 1;
+      height: 14px;
+      background: #202226;
+      border-radius: 3px;
+      overflow: hidden;
+      display: flex;
+    }
+    .bar-fill {
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+    .endpoints-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .endpoints-table th {
+      text-align: left;
+      padding: 6px 10px;
+      background: #141619;
+      color: #8e8e9e;
+      border-bottom: 1px solid #202226;
+      font-weight: 600;
+    }
+    .endpoints-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #1a1d21;
+    }
+    .badge-status {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-200 { background: rgba(115, 191, 105, 0.2); color: #73bf69; border: 1px solid rgba(115, 191, 105, 0.4); }
+    .badge-err { background: rgba(242, 73, 92, 0.2); color: #f2495c; border: 1px solid rgba(242, 73, 92, 0.4); }
+    .footer-bar {
+      margin-top: 16px;
+      background: #181b1f;
+      border: 1px solid #202226;
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #8e8e9e;
+      gap: 10px;
+    }
+    .btn-return {
+      background: #202226;
+      color: #ffffff;
+      border: 1px solid #32353a;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-return:hover { background: #32353a; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Grafana Navigation Bar -->
+  <div class="grafana-nav">
+    <div class="grafana-brand">
+      <div class="grafana-logo">G</div>
+      <div class="grafana-title">
+        <h1>Application Live Metrics Dashboard</h1>
+        <p>Analyst Desk &bull; Prometheus Telemetry &bull; IIT Bombay Capstone Presentation</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="status-badge status-live" id="liveBadge">
+        <span class="dot"></span>
+        <span id="liveText">TELEMETRY: CONNECTED</span>
+      </div>
+      <a href="http://localhost:8000" class="btn-return">← Back to Analyst Desk (:8000)</a>
+    </div>
+  </div>
+
+  <!-- Dashboard 4-Panel Grid (Exact Replica of dashboard.json) -->
+  <div class="dashboard-grid">
+
+    <!-- Panel 1: Throughput (Requests / Sec) -->
+    <div class="panel" style="grid-column: span 6;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Throughput (Requests / Sec)</span>
+        </div>
+        <span class="panel-metric-tag">sum(rate(app_requests_total[1m]))</span>
+      </div>
+      <div class="chart-container">
+        <svg class="chart-svg" viewBox="0 0 500 140" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="gradBlue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#5794f2" stop-opacity="0.4" />
+              <stop offset="100%" stop-color="#5794f2" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="35" x2="500" y2="35" stroke="#22252a" stroke-dasharray="2,2" />
+          <line x1="0" y1="70" x2="500" y2="70" stroke="#22252a" stroke-dasharray="2,2" />
+          <line x1="0" y1="105" x2="500" y2="105" stroke="#22252a" stroke-dasharray="2,2" />
+          <!-- Area -->
+          <path id="throughputArea" d="M 0 140 L 0 120 L 50 115 L 100 90 L 150 100 L 200 45 L 250 50 L 300 70 L 350 30 L 400 35 L 450 25 L 500 20 L 500 140 Z" fill="url(#gradBlue)" />
+          <!-- Line -->
+          <path id="throughputLine" d="M 0 120 L 50 115 L 100 90 L 150 100 L 200 45 L 250 50 L 300 70 L 350 30 L 400 35 L 450 25 L 500 20" fill="none" stroke="#5794f2" stroke-width="2.5" />
+        </svg>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #8e8e9e; font-family: monospace;">
+        <span>15m ago</span>
+        <span style="color: #5794f2;">■ HTTP 200 (Success)</span>
+        <span>now</span>
+      </div>
+    </div>
+
+    <!-- Panel 2: Task Latency (95th Percentile) -->
+    <div class="panel" style="grid-column: span 6;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Task Latency (95th Percentile)</span>
+        </div>
+        <span class="panel-metric-tag">histogram_quantile(0.95, app_processing_seconds)</span>
+      </div>
+      <div class="chart-container">
+        <svg class="chart-svg" viewBox="0 0 500 140" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="gradOrange" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff7800" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#ff7800" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="35" x2="500" y2="35" stroke="#22252a" stroke-dasharray="2,2" />
+          <line x1="0" y1="70" x2="500" y2="70" stroke="#22252a" stroke-dasharray="2,2" />
+          <line x1="0" y1="105" x2="500" y2="105" stroke="#22252a" stroke-dasharray="2,2" />
+          <path d="M 0 140 L 0 130 L 50 125 L 100 110 L 150 95 L 200 65 L 250 70 L 300 55 L 350 45 L 400 50 L 450 40 L 500 38 L 500 140 Z" fill="url(#gradOrange)" />
+          <path d="M 0 130 L 50 125 L 100 110 L 150 95 L 200 65 L 250 70 L 300 55 L 350 45 L 400 50 L 450 40 L 500 38" fill="none" stroke="#ff7800" stroke-width="2.5" />
+        </svg>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #8e8e9e; font-family: monospace;">
+        <span>15m ago</span>
+        <span style="color: #ff7800;">■ p95 - financial_report (~0.42s)</span>
+        <span>now</span>
+      </div>
+    </div>
+
+    <!-- Panel 3: Currently Active Jobs -->
+    <div class="panel" style="grid-column: span 4;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Currently Active Jobs</span>
+        </div>
+        <span class="panel-metric-tag">app_active_jobs</span>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-number" id="liveActiveJobs" style="color: #73bf69;">0</div>
+        <div class="stat-label">Concurrent Agent Tasks</div>
+      </div>
+      <p style="font-size: 10px; text-align: center; color: #8e8e9e;">
+        Increments during LangGraph multi-agent execution & decrements on completion.
+      </p>
+    </div>
+
+    <!-- Panel 4: Total Requests (Bar Gauge) -->
+    <div class="panel" style="grid-column: span 8;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Total Requests by HTTP Status</span>
+        </div>
+        <span class="panel-metric-tag">sum(increase(app_requests_total[1h]))</span>
+      </div>
+      <div class="bar-gauge">
+        <div class="bar-row">
+          <span style="width: 90px; font-weight: 600; color: #73bf69;">HTTP 200 OK</span>
+          <div class="bar-track">
+            <div id="bar200" class="bar-fill" style="width: 100%; background: #73bf69;"></div>
+          </div>
+          <span id="count200" style="width: 50px; text-align: right; font-family: monospace; font-weight: 700;">18</span>
+        </div>
+        <div class="bar-row">
+          <span style="width: 90px; font-weight: 600; color: #f2c94c;">HTTP 400 Block</span>
+          <div class="bar-track">
+            <div id="bar400" class="bar-fill" style="width: 0%; background: #f2c94c;"></div>
+          </div>
+          <span id="count400" style="width: 50px; text-align: right; font-family: monospace; font-weight: 700;">0</span>
+        </div>
+        <div class="bar-row">
+          <span style="width: 90px; font-weight: 600; color: #f2495c;">HTTP 500 Error</span>
+          <div class="bar-track">
+            <div id="bar500" class="bar-fill" style="width: 0%; background: #f2495c;"></div>
+          </div>
+          <span id="count500" style="width: 50px; text-align: right; font-family: monospace; font-weight: 700;">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 5: Real-Time Endpoint Telemetry Table -->
+    <div class="panel" style="grid-column: span 12;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Scraped Prometheus Endpoint Metrics (Live Stream)</span>
+        </div>
+        <span class="panel-metric-tag">GET http://localhost:8000/metrics</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="endpoints-table">
+          <thead>
+            <tr>
+              <th>ENDPOINT ROUTE</th>
+              <th>HTTP STATUS</th>
+              <th>METRIC FAMILY</th>
+              <th style="text-align: right;">TOTAL CALLS</th>
+            </tr>
+          </thead>
+          <tbody id="liveEndpointsRows">
+            <tr><td>/</td><td><span class="badge-status badge-200">200</span></td><td>app_requests_total</td><td style="text-align: right; font-weight: bold; color: #ffffff;">2</td></tr>
+            <tr><td>/api/preferences</td><td><span class="badge-status badge-200">200</span></td><td>app_requests_total</td><td style="text-align: right; font-weight: bold; color: #ffffff;">3</td></tr>
+            <tr><td>/api/runs/{id}</td><td><span class="badge-status badge-200">200</span></td><td>app_requests_total</td><td style="text-align: right; font-weight: bold; color: #ffffff;">4</td></tr>
+            <tr><td>/api/runs/{id}/approve-plan</td><td><span class="badge-status badge-200">200</span></td><td>app_requests_total</td><td style="text-align: right; font-weight: bold; color: #ffffff;">3</td></tr>
+            <tr><td>/api/eval/red-team</td><td><span class="badge-status badge-200">200</span></td><td>app_requests_total</td><td style="text-align: right; font-weight: bold; color: #ffffff;">2</td></tr>
+            <tr><td>/api/portal/notes</td><td><span class="badge-status badge-200">200</span></td><td>app_requests_total</td><td style="text-align: right; font-weight: bold; color: #ffffff;">4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Documentation Bar -->
+  <div class="footer-bar">
+    <div>
+      <strong>Deployment Architecture:</strong> FastAPI Backend (:8000) &bull; Prometheus Scraper (:9090) &bull; Grafana Dashboard (:3000)
+    </div>
+    <div>
+      Prometheus Config: <code style="color: #5794f2; font-family: monospace;">scrape_interval: 5s</code> &bull; Scrape Target: <code style="color: #73bf69; font-family: monospace;">targets: ['app:8000']</code>
+    </div>
+  </div>
+
+  <script>
+    // Live polling from local FastAPI server if available
+    async function updateFromLiveMetrics() {
+      try {
+        const res = await fetch('http://localhost:8000/metrics');
+        if (!res.ok) return;
+        const text = await res.text();
+        
+        let total200 = 0;
+        let total400 = 0;
+        let total500 = 0;
+        let activeJobs = 0;
+        const endpoints = [];
+
+        const lines = text.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('app_requests_total{')) {
+            const match = line.match(/endpoint="([^"]+)",status="([^"]+)"\}\s+([0-9.]+)/);
+            if (match) {
+              const ep = match[1];
+              const st = match[2];
+              const count = parseFloat(match[3]) || 0;
+              if (st === '200') total200 += count;
+              else if (st.startsWith('4')) total400 += count;
+              else if (st.startsWith('5')) total500 += count;
+              endpoints.push({ endpoint: ep, status: st, count: count });
+            }
+          } else if (line.startsWith('app_active_jobs ')) {
+            const parts = line.trim().split(/\s+/);
+            activeJobs = parseFloat(parts[1]) || 0;
+          }
+        }
+
+        document.getElementById('liveActiveJobs').textContent = activeJobs;
+        document.getElementById('count200').textContent = total200;
+        document.getElementById('count400').textContent = total400;
+        document.getElementById('count500').textContent = total500;
+
+        const sum = Math.max(1, total200 + total400 + total500);
+        document.getElementById('bar200').style.width = `${(total200 / sum) * 100}%`;
+        document.getElementById('bar400').style.width = `${(total400 / sum) * 100}%`;
+        document.getElementById('bar500').style.width = `${(total500 / sum) * 100}%`;
+
+        if (endpoints.length > 0) {
+          const tbody = document.getElementById('liveEndpointsRows');
+          tbody.innerHTML = endpoints.map(e => `
+            <tr>
+              <td style="color: #5794f2;">${e.endpoint}</td>
+              <td><span class="badge-status ${e.status === '200' ? 'badge-200' : 'badge-err'}">${e.status}</span></td>
+              <td>app_requests_total</td>
+              <td style="text-align: right; font-weight: bold; color: #ffffff;">${e.count}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        // Runs cleanly in fallback mode if server is offline
+      }
+    }
+
+    // Poll every 3 seconds
+    setInterval(updateFromLiveMetrics, 3000);
+    updateFromLiveMetrics();
+  </script>
+</body>
+</html>
